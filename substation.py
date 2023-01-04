@@ -18,7 +18,7 @@ for i in range(1, 89):
 mst = kruskal(wind_park, distance_threshold=2000)
 
 
-def local_connectivity(wind_park, mst):
+def local_connectivity(G, mst):
     mst_graph = nx.Graph()
     for u, v, w in mst:
         mst_graph.add_edge(u, v, weight=w)
@@ -30,7 +30,7 @@ def local_connectivity(wind_park, mst):
     print(f"The local_connectivity for all pairs of nodes in the MST are: {connectivity}.")
 
 
-def compute_degree(wind_park, mst):
+def compute_degree(G, mst):
 
     mst_graph = nx.Graph()
     for u, v, w in mst:
@@ -47,19 +47,26 @@ def compute_degree(wind_park, mst):
         return mst_graph.nodes()[0]
 
     degrees = {n: mst_graph.degree(n) for n in candidates}
-    aggregation_node = max(degrees, key=degrees.get)
+    highest_degree = max(degrees, key=degrees.get)
 
-    print("The aggregation_node is: {} (in the MST graph represented as S) and has a degree of {}".format(aggregation_node, degrees[aggregation_node]) )
+    print("The node with the highest degree is: {} (in the MST graph represented as S) and has a degree of {}".format(highest_degree, degrees[highest_degree]))
 
-    return aggregation_node
+    return highest_degree
 
-### to call local_connectivity()
-#local_connectivity(wind_park, mst)
+def compute_centrality():
+    mst_graph = nx.Graph()
 
-### to call compute_degree() 
-#compute_degree(wind_park, mst)
+    for u, v, w in mst:
+        mst_graph.add_edge(u, v, weight=w)
 
-def draw_aggr_node(mst, G):
+    degree_cent = nx.degree_centrality(mst_graph)
+    highest_cent = max(degree_cent.items(), key=lambda x: x[1])[0]
+
+    print("The node with the highest centrality is: {} (in the MST graph represented as S) and has a centrality of {}".format(highest_cent, degree_cent[highest_cent]))
+
+    return highest_cent
+
+def draw_substation(mst, G):
 
     mst_graph = nx.Graph()
 
@@ -68,7 +75,15 @@ def draw_aggr_node(mst, G):
 
     pos = nx.kamada_kawai_layout(mst_graph, scale=300)
 
-    aggregation_node = compute_degree(G, mst)
+    highest_cent = compute_centrality()
+    highest_degree = compute_degree(G, mst)
+
+    if highest_cent == highest_degree:
+        aggregation_node = highest_degree
+    else:
+        print("if the centrality and degree are not the same, the aggregation node will be the one with the highest centrality")
+        aggregation_node = highest_cent
+
     mst_nodes = [node for node in mst_graph.nodes()]
 
     node_colors = ['orange' if node == aggregation_node else '#87CEEB' for node in mst_nodes]
@@ -116,7 +131,12 @@ def draw_aggr_node(mst, G):
 
 
 if __name__ == "__main__":
-    draw_aggr_node(mst, wind_park)
+    ### to also compute the local connectivity
+    #local_connectivity(wind_park, mst)
+
+    compute_degree(wind_park, mst)
+    compute_centrality()
+    draw_substation(mst, wind_park)
 
 
 
