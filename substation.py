@@ -12,7 +12,7 @@ while wind_park.G.number_of_nodes() < 88:
 
 for i in range(1, 89):
     for j in range(i+1, 89):
-        wind_park.add_edge(i)
+        wind_park.add_edge(i, j)
 
 
 mst = kruskal(wind_park, distance_threshold=2000)
@@ -73,7 +73,7 @@ def draw_substation(mst, G):
     for u, v, w in mst:
         mst_graph.add_edge(u, v, weight=w)
 
-    pos = nx.kamada_kawai_layout(mst_graph, scale=300)
+    pos = nx.kamada_kawai_layout(mst_graph, scale=500)
 
     highest_cent = compute_centrality()
     highest_degree = compute_degree(G, mst)

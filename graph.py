@@ -23,109 +23,99 @@ class WindParkGraph:
         self.G = nx.Graph()
 
     def add_turbine(self, turbine):
-        rotor_diameter=130
+        rotor_diameter=154
 
         for other_turbine in self.turbines:
-            if turbine.distance(other_turbine) < 3*rotor_diameter:
+            if turbine.distance(other_turbine) < 4*rotor_diameter:
                 return
 
         # if the turbine passes the distance constraint, add it to the list and the graph
         self.turbines.append(turbine)
         self.G.add_node(turbine.ID, pos=(turbine.x, turbine.y))
 
-        # add edges to the graph connecting the new turbine to all other turbines (followting distance constrain)
-        for other_turbine in self.turbines:
-            if turbine.ID != other_turbine.ID and turbine.distance(other_turbine) >= 3:
-                self.G.add_edge(turbine.ID, other_turbine.ID, weight=turbine.distance(other_turbine))
-
-        
     def add_edge(self, ID1):
-        # check if the node does not exist in the graph
-        if ID1 not in self.G:
-            return
-
-        # find the wind turbine with ID1 in the list
-        turbine = None
+        turbine1 = None
         for t in self.turbines:
             if t.ID == ID1:
-                turbine = t
+                turbine1 = t
                 break
+        
+        if turbine1 is None:
+            return "Turbine with ID {} was not found in the list".format(ID1)
 
-        # if the wind turbine was not found, return
-        if turbine is None:
-            return
-
-        # loop over all the wind turbines in the list
-        for other_turbine in self.turbines:
-            # if the distance between the two turbines is at least 3 times the rotor diameter, add an edge to the graph
-            if turbine.ID != other_turbine.ID and turbine.distance(other_turbine) >= 3:
-                # check if there is already an edge between the two nodes
-                if self.G.has_edge(turbine.ID, other_turbine.ID):
-                    # update the weight of the existing edge
-                    weight = floor(random.randint(300, 3000))
-                    self.G[turbine.ID][other_turbine.ID]['weight'] = weight
+        for turbine2 in self.turbines:
+            # avoid self-loops
+            if turbine1.ID != turbine2.ID:
+                if self.G.has_edge(turbine1.ID, turbine2.ID):
+                    # Update the weight of the existing edge
+                    weight = turbine1.distance(turbine2)
+                    self.G[turbine1.ID][turbine2.ID]['weight'] = weight
                 else:
-                    # add a new edge with a random weight
-                    weight = floor(random.randint(300, 3000))
-                    self.G.add_edge(turbine.ID, other_turbine.ID, weight=weight)
+                    # Add a new weighted edge
+                    weight = turbine1.distance(turbine2)
+                    self.G.add_edge(turbine1.ID, turbine2.ID, weight=weight)
 
+        if self.check_cables():
+            return "The new cable intersects with an existing one"
 
     # sweep line algorithm to check if cables connecting overlap or touch:
     def check_cables(self):
-        # sort the wind turbines by their x coordinate
         self.turbines.sort(key=lambda x: x.x)
         
-        # initialize an empty list to store the intersecting cables
-        intersecting_cables = []
-        
-        # scan the sweep line across the wind park
         for turbine in self.turbines:
-            # get the cable connecting the wind turbine to its nearest neighbor on the left or right
-            if turbine.ID == 0:
-                cable = self.G[turbine.ID][self.turbines[turbine.ID+1].ID]['weight']
-            elif turbine.ID == len(self.turbines)-1:
-                cable = self.G[turbine.ID][self.turbines[turbine.ID-1].ID]['weight']
-            else:
-                left_cable = self.G[turbine.ID][self.turbines[turbine.ID-1].ID]['weight']
-                right_cable = self.G[turbine.ID][self.turbines[turbine.ID+1].ID]['weight']
-                if left_cable < right_cable:
-                    cable = left_cable
+            try:
+                # if ID1 = 0 then ID2 is the second element of the list (right ID)
+                if turbine.ID == 0:
+                    ID1 = turbine.ID
+                    ID2 = self.turbines[turbine.ID+1].ID
+                # if ID1 is the last ID then ID2 is the second to last element of the list (left ID)
+                elif turbine.ID == len(self.turbines)-1:
+                    ID1 = turbine.ID
+                    ID2 = self.turbines[turbine.ID-1].ID
+                # else check the weight of the cable to compare the length of the cable (weight) 
                 else:
-                    cable = right_cable
-            
-            # check whether the cable intersects any of the intersecting cables
-            for intersecting_cable in intersecting_cables:
-                if self.check_intersection(cable, intersecting_cable):
-                    return True
-            
-            # add the cable to the list of intersecting cables
-            intersecting_cables.append(cable)
-        
-        # if no intersecting cables were found, return False
-        return False
-    
-    def check_intersection(self, cable1, cable2):
-        # calculate the x and y coordinates of the two endpoints of the cables
-        x1, y1 = self.get_coordinates(cable1)
-        x2, y2 = self.get_coordinates(cable2)
-        
-        # check whether the cables intersect
-        if min(x1, x2) <= max(x1, x2) and min(y1, y2) <= max(y1, y2):
-            return True
-        else:
-            return False
+                    left_ID1 = turbine.ID
+                    left_ID2 = self.turbines[turbine.ID-1].ID
+                    right_ID1 = turbine.ID
+                    right_ID2 = self.turbines[turbine.ID+1].ID
+                    left_cable = self.G[turbine.ID][self.turbines[turbine.ID-1].ID]['weight']
+                    right_cable = self.G[turbine.ID][self.turbines[turbine.ID+1].ID]['weight']
+                    if left_cable < right_cable:
+                        ID1 = left_ID1
+                        ID2 = left_ID2
+                    else:
+                        ID1 = right_ID1
+                        ID2 = right_ID2
 
-    def get_coordinates(self, cable):
-        # get the IDs of the wind turbines to which the cable is attached
-        ID1, ID2 = self.G.edges[cable]['weight']
-        
-        # get the x and y coordinates of the wind turbines
-        x1, y1 = self.G.nodes[ID1]['pos']
-        x2, y2 = self.G.nodes[ID2]['pos']
-        
-        return (x1, y1, x2, y2)
-    
-    # to check the connectivity (in the network_structure module)
+                # check if the cables intersect or touch
+                if self.check_intersection(ID1, ID2):
+                    return True
+            except:
+                continue
+        return False
+
+    def check_intersection(self, ID1, ID2):
+        # check if the cables intersect using the line intersection formula
+        x1, y1 = self.turbines[ID1].x, self.turbines[ID1].y
+        x2, y2 = self.turbines[ID2].x, self.turbines[ID2].y
+        for other_turbine in self.turbines:
+            if other_turbine.ID == ID1 or other_turbine.ID == ID2:
+                continue
+            x3, y3 = other_turbine.x, other_turbine.y
+            for other_other_turbine in self.turbines:
+                if other_other_turbine.ID == ID1 or other_other_turbine.ID == ID2 or other_other_turbine.ID == other_turbine.ID:
+                    continue
+                x4, y4 = other_other_turbine.x, other_other_turbine.y
+                d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+                if d == 0:
+                    continue
+                uA = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / d
+                uB = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / d
+                if uA > 0 and uA < 1 and uB > 0 and uB < 1:
+                    return True
+        return False
+
+    # needed to compute the local connectivity (in the substation module)
     def is_directed(self):
         return False
 
@@ -144,23 +134,22 @@ class WindParkGraph:
 
         plt.show()
 
-
     def check_num(self):
             num_nodes = self.G.number_of_nodes()
             num_edges = self.G.number_of_edges()
             weights = list(self.G.edges(data='weight'))
-            print("The number of nodes is: {}, and the number of edges is: {}. \nA list containing nodes, edges and weights: {}".format(num_nodes, num_edges, weights))
+            print("The number of nodes is: {}, and the number of edges is: {}.\nA list containing nodes, edges and weights: {}".format(num_nodes, num_edges, weights))
 
 
-# create an instance of the WindParkGraph class and add 87 wind turbines to it
+# create an instance of the WindParkGraph class
 wind_park = WindParkGraph()
-
 
 # add wind turbines to the graph until there are 87 nodes
 while wind_park.G.number_of_nodes() < 87:
     x = floor(random.uniform(1000, 10000))
     y = floor(random.uniform(1000, 10000))
-    wt = WindTurbine(x, y, wind_park.G.number_of_nodes())
+    ID = wind_park.G.number_of_nodes()
+    wt = WindTurbine(x, y, ID)
     wind_park.add_turbine(wt)
 
 # add edges between the wind turbines

@@ -65,7 +65,7 @@ class DisjointSet:
             self.parent[x_root] = y_root
 
 
-# create an instance of the WindParkGraph class and add 87 wind turbines to it
+# create an instance of the WindParkGraph class
 wind_park = WindParkGraph()
 
 
@@ -79,7 +79,7 @@ while wind_park.G.number_of_nodes() < 87:
 # add edges between the wind turbines
 for i in range(1, 88):
     for j in range(i+1, 88):
-        wind_park.add_edge(i)
+        wind_park.add_edge(i, j)
 
 
 mst = kruskal(wind_park, distance_threshold=2000)
