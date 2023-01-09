@@ -12,10 +12,10 @@ while wind_park.G.number_of_nodes() < 88:
 
 for i in range(1, 89):
     for j in range(i+1, 89):
-        wind_park.add_edge(i, j)
+        wind_park.add_edge(i)
 
 
-mst = kruskal(wind_park, distance_threshold=2000)
+mst = kruskal(wind_park)
 
 
 def local_connectivity(G, mst):
@@ -87,14 +87,6 @@ def draw_substation(mst, G):
     mst_nodes = [node for node in mst_graph.nodes()]
 
     node_colors = ['orange' if node == aggregation_node else '#87CEEB' for node in mst_nodes]
-
-############################# STILL TO DO ######################################
-    # still need to change the change the shape
-    # and to find a solution for the overlapping of nodes and edges
-    # try verticalalignment='top', horizontalalignment='center' for the labels
-    # the line should not start from the center of node S and to not overlapp over other nodes
-    # here I still need to check the overlapping even for the edges not just the nodes
-################################################################################
 
     nx.draw(mst_graph, pos=pos, nodelist=mst_nodes, node_color=node_colors)
 

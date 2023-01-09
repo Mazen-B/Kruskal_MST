@@ -1,6 +1,6 @@
 from graph import *
 
-def kruskal(G, distance_threshold):
+def kruskal(G):
     mst = []
 
     # sort the edges of the graph by weight in ascending order
@@ -14,8 +14,8 @@ def kruskal(G, distance_threshold):
 
     for u, v, w in sorted_edges:
         w = floor(w)
-        # If the endpoints of the edge belong to different connected components, add the edge to the MST and union the connected components
-        if ds.find(u) != ds.find(v) and w > distance_threshold:
+        # to avoid cycles
+        if ds.find(u) != ds.find(v):
             mst.append((u, v, w))
             ds.union(u, v)
 
@@ -27,11 +27,10 @@ def draw_mst(mst, G):
     for u, v, w in mst:
         mst_graph.add_edge(u, v, weight=w)
 
-    # use the Kamada-Kawai layout, which uses a force-directed approach to positioning the nodes:
     # scale parameter controls the overall spacing between all the nodes in the layout
-    pos = nx.kamada_kawai_layout(mst_graph, scale=100)
+    pos = nx.kamada_kawai_layout(mst_graph, scale=500)
 
-    nx.draw(mst_graph, pos, with_labels=False, font_weight='bold', node_size=350)
+    nx.draw(mst_graph, pos, with_labels=False, font_weight='bold', node_size=200)
 
     labels = {}
     for i in range(87):
@@ -50,14 +49,18 @@ class DisjointSet:
     def __init__(self):
         self.parent = {}
     
+    # create new set
     def make_set(self, x):
         self.parent[x] = x
     
+    # returns the root of the set that x belongs to
     def find(self, x):
-        if self.parent[x] != x:
+        if self.parent[x] != x: 
+            # x not root and has a parent
             self.parent[x] = self.find(self.parent[x])
         return self.parent[x]
-    
+
+    # merge two sets into a single set (if they are disjoint)
     def union(self, x, y):
         x_root = self.find(x)
         y_root = self.find(y)
@@ -67,7 +70,6 @@ class DisjointSet:
 
 # create an instance of the WindParkGraph class
 wind_park = WindParkGraph()
-
 
 # add wind turbines to the graph until there are 87 nodes
 while wind_park.G.number_of_nodes() < 87:
@@ -79,11 +81,9 @@ while wind_park.G.number_of_nodes() < 87:
 # add edges between the wind turbines
 for i in range(1, 88):
     for j in range(i+1, 88):
-        wind_park.add_edge(i, j)
+        wind_park.add_edge(i)
 
-
-mst = kruskal(wind_park, distance_threshold=2000)
-
+mst = kruskal(wind_park)
 
 
 if __name__ == "__main__":

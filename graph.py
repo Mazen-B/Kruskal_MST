@@ -41,7 +41,7 @@ class WindParkGraph:
                 break
         
         if turbine1 is None:
-            return "Turbine with ID {} was not found in the list".format(ID1)
+            return "Turbine with ID{} was not found in the list".format(ID1)
 
         for turbine2 in self.turbines:
             # avoid self-loops
