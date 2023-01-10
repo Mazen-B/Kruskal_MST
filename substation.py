@@ -17,7 +17,7 @@ for i in range(1, 89):
 
 mst = kruskal(wind_park)
 
-
+# the local_connectivity is added just to test if we only have one connection between each 2 nodes (as it should for an MST)
 def local_connectivity(G, mst):
     mst_graph = nx.Graph()
     for u, v, w in mst:
@@ -35,11 +35,10 @@ def compute_degree(G, mst):
     mst_graph = nx.Graph()
     for u, v, w in mst:
         mst_graph.add_edge(u, v, weight=w)
-
     candidates = []
 
     for node in mst_graph.nodes():
-        if mst_graph.degree(node) > 1:
+        if mst_graph.degree(node) >= 1:
             candidates.append(node)
  
     if not candidates:
