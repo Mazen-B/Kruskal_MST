@@ -74,14 +74,7 @@ def draw_substation(mst, G):
 
     pos = nx.kamada_kawai_layout(mst_graph, scale=500)
 
-    highest_cent = compute_centrality()
-    highest_degree = compute_degree(G, mst)
-
-    if highest_cent == highest_degree:
-        aggregation_node = highest_degree
-    else:
-        print("if the centrality and degree are not the same, the aggregation node will be the one with the highest centrality")
-        aggregation_node = highest_cent
+    aggregation_node = compute_degree(G, mst)
 
     mst_nodes = [node for node in mst_graph.nodes()]
 
