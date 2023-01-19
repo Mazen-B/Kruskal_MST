@@ -14,7 +14,7 @@ The created graph is a random graph with a probability of 1 because we are inter
     <img src="./Figures/kruskal.png" alt="Alt text">
     <figcaption>Figure 2: Output when running the draw method in kruskal_algorithm.py</figcaption>
     </figure>
-3. *substation.py* computes the local connectivity, centrality and the degrees of the computed MST graph then takes the nodes that has the highest degree as a substation (or aggregation node). Because we will add a substation the graph will be created with 88 nodes.
+3. *substation.py* computes the local connectivity, clustering, highest degree centrality, highest degree, highest betweenness centrality and closeness centrality of the computed MST graph. The methods that compute the highest degree, highest betweenness centrality, and closeness centrality are used to find the aggregation node, which serves as the central point of connection for all the other nodes in the network.
     <figure>
     <img src="./Figures/substation.png" alt="Alt text">
     <figcaption>Figure 3: Output when running the draw method in substation.py</figcaption>
