@@ -1,6 +1,6 @@
 """
-The purpose of this module is to test and to understand the network.
-The methods that compute the local connectivity, clustering, and highest degree centrality provide insight into the structure of the Minimum Spanning Tree (MST) graph. 
+The purpose of this module is to test and to understand the MST graph then to add an aggregation node.
+The methods that compute the local connectivity, clustering, and highest degree centrality provide insight into the graph. 
 The methods that compute highest degree, highest betweenness centrality and closeness centrality are used to find the aggregation node.
 """
 from networkx.algorithms.connectivity import local_node_connectivity

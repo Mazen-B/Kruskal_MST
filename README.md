@@ -19,3 +19,5 @@ The created graph is a random graph with a probability of 1 because we are inter
     <img src="./Figures/substation.png" alt="Alt text">
     <figcaption>Figure 3: Output when running the draw method in substation.py</figcaption>
     </figure>
+
+This project is a part of a university course project for the Systems and Network Analysis course.
