@@ -1,9 +1,7 @@
 """
-The purpose of this module is to test and to understand the MST graph then to add an aggregation node.
-The methods that compute the local connectivity, clustering, and highest degree centrality provide insight into the graph. 
-The methods that compute highest degree, highest betweenness centrality and closeness centrality are used to find the aggregation node.
+This module aims to find the most important node (an aggregation node) and then draw it as a substation (S) in the MST graph.
+The methods that compute the highest degree, highest betweenness centrality and closeness centrality are used to find the aggregation node.
 """
-from networkx.algorithms.connectivity import local_node_connectivity
 from kruskal_algorithm import *
 
 
@@ -25,37 +23,6 @@ mst = kruskal(wind_park)
 mst_graph = nx.Graph()
 for u, v, w in mst:
     mst_graph.add_edge(u, v, weight=w)
-
-
-# the local_connectivity is added just to test if we only have one connection between each 2 nodes (as it should for an MST)
-def local_connectivity():
-
-    connectivity = {}
-    for u, v in mst_graph.edges():
-        connectivity[(u, v)] = local_node_connectivity(mst_graph, u, v)
-
-    print(f"The local_connectivity for all pairs of nodes in the MST are: {connectivity}.")
-
-# test the connection of the network (for an MST it would be 0)
-def compute_clustering():
-    for u, v in mst_graph.edges():
-        local_clustering = nx.clustering(mst_graph, u)
-
-        print(f"The local clustering coefficient for node {u} is {local_clustering}.")
-
-    global_clustering = nx.transitivity(mst_graph)
-    print(f"The global clustering coefficient for the MST graph is {global_clustering}.")
-
-    return local_clustering, global_clustering
-
-def compute_degree_centrality():
-
-    degree_cent = nx.degree_centrality(mst_graph)
-    highest_cent = max(degree_cent.items(), key=lambda x: x[1])[0]
-
-    print("The node with the highest centrality is: {} (in the MST graph represented as S) and has a centrality of {}".format(highest_cent, degree_cent[highest_cent]))
-
-    return highest_cent
 
 def compute_degree():
 
@@ -88,11 +55,17 @@ def find_aggregation_node():
     betweenness_centrality = compute_betweenness_centrality()
     closeness_centrality = compute_closeness_centrality()
 
-    for node in mst_graph.nodes():
-        if node in degree and node in betweenness_centrality and node in closeness_centrality:
-            print("The aggregation node is: {} (represented in the graph as S)".format(node))
-            return node
-    
+    degree_sorted = sorted(degree.items(), key=lambda x: x[1], reverse=True)
+    betweenness_centrality_sorted = sorted(betweenness_centrality.items(), key=lambda x: x[1], reverse=True)
+    closeness_centrality_sorted = sorted(closeness_centrality.items(), key=lambda x: x[1], reverse=True)
+
+    for aggregation_node, _ in degree_sorted:
+        for node_betweenness, _ in betweenness_centrality_sorted:
+            for node_closeness, _ in closeness_centrality_sorted:
+                if aggregation_node == node_betweenness and aggregation_node == node_closeness:
+                    print("The aggregation node is: {} (represented in the graph as S)".format(aggregation_node))
+                    return aggregation_node
+      
     highest_degree = max(degree, key=degree.get)
     print("No intersection node found, returning the highest degree node in the network: ", highest_degree)
     return highest_degree

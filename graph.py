@@ -134,25 +134,11 @@ class WindParkGraph:
 
         plt.show()
 
-    # this method checks if we have a random graph with p=1
-    def check_topology(self):
+    def check_num(self):
             num_nodes = self.G.number_of_nodes()
             num_edges = self.G.number_of_edges()
             weights = list(self.G.edges(data='weight'))
             print("The number of nodes is: {}, and the number of edges is: {}.\nA list containing nodes, edges and weights: {}".format(num_nodes, num_edges, weights))
-
-            # average degree 
-            candidates = []
-            for node in self.G.nodes():
-                if self.G.degree(node) >= 1:
-                    candidates.append(node)
-            degrees = {n: self.G.degree(n) for n in candidates}
-            k = sum(degrees.values())/len(degrees.values())
-            print("The average degree (<k>) is: ", k)
-
-            # Random failure for an ER-network
-            fc=1-(1/k)
-            print("The fc for this graph is: ", fc)
 
 # create an instance of the WindParkGraph class
 wind_park = WindParkGraph()
@@ -171,8 +157,8 @@ for i in range(1, 88):
         wind_park.add_edge(i)
 
 ### just for debugging:
-### to check the network topology
-#print(wind_park.check_topology())
+### to check how many edges and nodes we have
+#print(wind_park.check_num())
 
 ### to check if all the turbines ID if they are added in add_turbine()
 ###  add this to the add_trubine print(f"Adding turbine with ID {turbine.ID} to the graph")
