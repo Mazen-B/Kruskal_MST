@@ -1,9 +1,10 @@
 """
-This module contains the implementation of various graph analysis techniques that can be used to understand the properties of a graph.
+This module contains the implementation of various graph analysis techniques that can be used to understand the properties of the original graph or the computed MST.
 
 """
 
 from graph import *
+from kruskal_algorithm import *
 from networkx.algorithms.connectivity import local_node_connectivity
 
 
@@ -22,6 +23,13 @@ for i in range(1, 88):
     for j in range(i+1, 88):
         wind_park.add_edge(i)
 
+mst = kruskal(wind_park)
+
+mst_graph = nx.Graph()
+for u, v, w in mst:
+    mst_graph.add_edge(u, v, weight=w)
+
+# to analyse the MST graph use mst_graph instead of wind_park.G
 class GraphAnalysis():
     def get_diameter(self):
         diameter = nx.diameter(wind_park.G)
@@ -69,17 +77,23 @@ class GraphAnalysis():
         print("The Raduis is: ", radius)
         print("The center of the graph is: ", center)
 
-    # check robustness
+    # check robustness of the MST
     def get_percolation(self, num_nodes_to_remove):
-        original_num_nodes = wind_park.G.number_of_nodes()
+        original_num_nodes = len(mst_graph)
         largest_components = []
         for _ in range(num_nodes_to_remove):
-            node_to_remove = random.choice(list(wind_park.G.nodes()))
-            wind_park.G.remove_node(node_to_remove)
-            largest_component = max(nx.connected_components(wind_park.G), key=len)
+            if not mst_graph.nodes():
+                print(f"The network has failed after removing {num_nodes_to_remove} nodes")
+                return
+            node_to_remove = random.choice(list(mst_graph.nodes()))
+            mst_graph.remove_node(node_to_remove)
+            if mst_graph.number_of_nodes() == 0:
+                print(f"The network has failed after removing {num_nodes_to_remove} nodes")
+                return
+            largest_component = max(nx.connected_components(mst_graph), key=len)
             largest_components.append(len(largest_component))
         percolation = max(largest_components) / original_num_nodes
-        print("The percolation is: ", percolation)
+        print(f"The percolation after removing {num_nodes_to_remove} nodes for the MST is: {percolation}")
         return percolation
 
 
@@ -96,6 +110,9 @@ if __name__ == "__main__":
     analyze_graph.connectivity()
     analyze_graph.eccentricity()
     analyze_graph.radius_center()
+    analyze_graph.get_percolation(80)
     analyze_graph.get_percolation(3)
+    analyze_graph.get_percolation(10)
+    analyze_graph.get_percolation(25)
 
 
